@@ -11,19 +11,19 @@ import android.media.MediaRecorder;
 
 public class MainActivity extends AppCompatActivity {
 
-    MediaRecorder mRecorder;
+    MediaRecorder recorder;
     public void startRecord(View view){
-        Log.i("Hello","sup");
-        if (mRecorder == null)
+        Log.i("Inside","start record");
+        if (recorder == null)
         {
-            mRecorder = new MediaRecorder();
-            mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            mRecorder.setOutputFile("/dev/null");
+            recorder = new MediaRecorder();
+            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            recorder.setOutputFile("/dev/null");
             try
             {
-                mRecorder.prepare();
+                recorder.prepare();
             }catch (java.io.IOException ioe) {
                 android.util.Log.e("[Monkey]", "IOException: " +
                         android.util.Log.getStackTraceString(ioe));
@@ -34,28 +34,24 @@ public class MainActivity extends AppCompatActivity {
             }
             try
             {
-                mRecorder.start();
+                recorder.start();
             }catch (java.lang.SecurityException e) {
                 android.util.Log.e("[Monkey]", "SecurityException: " +
                         android.util.Log.getStackTraceString(e));
             }
 
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            if (mRecorder != null) {
-                mRecorder.stop();
-                mRecorder.release();
-                mRecorder = null;
-            }
-            Log.i("Hello","record complete");
-
             //mEMA = 0.0;
         }
 
+    }
+
+    public void stopRecord(View view){
+        if (recorder != null) {
+            recorder.stop();
+            recorder.release();
+            recorder = null;
+        }
+        Log.i("Hello","record complete");
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
