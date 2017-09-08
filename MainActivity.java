@@ -39,8 +39,6 @@ public class MainActivity extends AppCompatActivity {
                 android.util.Log.e("[Monkey]", "SecurityException: " +
                         android.util.Log.getStackTraceString(e));
             }
-
-            //mEMA = 0.0;
         }
 
     }
