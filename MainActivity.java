@@ -1,85 +1,115 @@
-package com.example.rohanbs.soundtest;
-
-import android.support.v7.app.AppCompatActivity;
+package com.example.rohanbs.decibeltest;
+import android.app.Activity;
+import android.media.MediaRecorder;
 import android.os.Bundle;
-import android.widget.TextView;
-import android.view.View;
 import android.os.Handler;
 import android.util.Log;
-import android.media.MediaRecorder;
+import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
-    TextView mStatusView;
-    Thread runner;
+    TextView screenshow;
+    MediaRecorder rec;
+
     private static double mEMA = 0.0;
     static final private double EMA_FILTER = 0.6;
+    Thread decicalc;
 
-    static String decider="0";
-    private dbRunnable newdb = new dbRunnable();
-    MediaRecorder recorder;
-
-    class dbRunnable implements Runnable{
-
-        @Override
+    final Runnable updater = new Runnable(){
         public void run(){
-            Log.i("Runnable","called");
-            Log.i("decider",decider);
-            while(true){
-                Log.i("Runnable","called");//updateTv();
-                if(decider=="1"){
-                    break;
-                }
-            }
+            printDec();
         }
+    };
+    final Handler mHandler = new Handler();
 
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.i("onCreate","reached");
+        setContentView(R.layout.activity_main);
+        screenshow = (TextView) findViewById(R.id.sample_text);
+        if (decicalc == null)
+        {
+            decicalc = new Thread(){
+                public void run()
+                {
+                    while (decicalc != null)
+                    {
+                        try
+                        {
+                            Log.i("Calling", "runnable");
+                            Thread.sleep(50);
+                        } catch (InterruptedException e) { };
+                        mHandler.post(updater);
+                    }
+                }
+            };
+
+            decicalc.start();   //start the runnable's run method
+        }
     }
-final Handler mHandler = new Handler();
 
+    public void onResume()
+    {
+        super.onResume();
+        Log.i("Starting","recorder");
+        startRecord();
+    }
 
-    public void startRecord(View view) {
-        Log.i("Inside", "start record");
-        if (recorder == null) {
-            recorder = new MediaRecorder();
-            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            recorder.setOutputFile("/dev/null");
-            try {
-                recorder.prepare();
-            } catch (java.io.IOException ioe) {
+    public void onPause()
+    {
+        super.onPause();
+        stopRecord();
+    }
+
+    public void startRecord(){
+        if (rec == null)
+        {
+            rec = new MediaRecorder();
+            rec.setAudioSource(MediaRecorder.AudioSource.MIC);
+            rec.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            rec.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            rec.setOutputFile("/dev/null");
+            try
+            {
+                rec.prepare();
+            }catch (java.io.IOException ioe) {
                 android.util.Log.e("[Monkey]", "IOException: " +
                         android.util.Log.getStackTraceString(ioe));
 
-            } catch (java.lang.SecurityException e) {
+            }catch (java.lang.SecurityException e) {
                 android.util.Log.e("[Monkey]", "SecurityException: " +
                         android.util.Log.getStackTraceString(e));
             }
-            try {
-                recorder.start();
-                Thread dec1 = new Thread(newdb);
-                dec1.start();
-                //mHandler.post(updater);
-            } catch (java.lang.SecurityException e) {
+            try
+            {
+                rec.start();
+            }catch (java.lang.SecurityException e) {
                 android.util.Log.e("[Monkey]", "SecurityException: " +
                         android.util.Log.getStackTraceString(e));
             }
-        }
-    }
-    public void stopRecord(View view){
-        if (recorder != null) {
-            recorder.stop();
-            recorder.release();
-            recorder = null;
+
         }
 
-        decider="1";
+    }
+    public void stopRecord() {
+        if (rec != null) {
+            rec.stop();
+            rec.release();
+            rec = null;
+        }
+    }
 
-        Log.i("Hello","record complete");
+    public void printDec(){
+        screenshow.setText(Double.toString((decibelconverter())) + " dB");   //Print decibel value onto screen
     }
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+
+    public double decibelconverter() {
+        double amplitude =  0;          //set amplitude to 0 initially
+        if (rec!=null)
+            amplitude = (rec.getMaxAmplitude());     //if sound is being recorded, getMaxAmplitude
+
+        mEMA = EMA_FILTER * amplitude + (1.0 - EMA_FILTER) * mEMA;  //Formula for converting amplitude to decibels
+        return mEMA/100;
     }
+
 }
