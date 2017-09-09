@@ -26,7 +26,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         Log.i("onCreate","reached");
         setContentView(R.layout.activity_main);
-        screenshow = (TextView) findViewById(R.id.);
+        screenshow = (TextView) findViewById(R.id.sample_text);
         if (decicalc == null)
         {
             decicalc = new Thread(){
