@@ -37,7 +37,7 @@ public class MainActivity extends Activity {
                         try
                         {
                             Log.i("Calling", "runnable");
-                            Thread.sleep(50);
+                            Thread.sleep(200);
                         } catch (InterruptedException e) { };
                         mHandler.post(updater);
                     }
